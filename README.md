@@ -1,6 +1,6 @@
 # Hello World
-[^1]: Hello, its my first project, i ussage this in my main bot for messenger. 
-[^2]: Ussage is very simple, just watch the usage column.
+Hello, its my first project, i ussage this in my main bot for messenger. 
+Ussage is very simple, just watch the usage column.
 # Requirements
 its simple.
 - Python with installed fbchat,
@@ -13,4 +13,8 @@ If evrything is okay, open the Microsoft SHELL/CMD and put this command:
 ```
 -python start.py
 ```
+Now follow instructions on ecran, if you spoolied something, delete inside of config.json file.
 
+# Know issues
+- Special Characters gives error.
+- Emoticon dont works.
