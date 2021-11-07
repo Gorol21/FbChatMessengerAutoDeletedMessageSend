@@ -1,6 +1,6 @@
 # Hello World
-[^1]Hello, its my first project, i ussage this in my main bot for messenger. 
-[^2]Ussage is very simple, just watch the usage column.
+[^1]: Hello, its my first project, i ussage this in my main bot for messenger. 
+[^2]: Ussage is very simple, just watch the usage column.
 # Requirements
 its simple.
 - Python with installed fbchat,
