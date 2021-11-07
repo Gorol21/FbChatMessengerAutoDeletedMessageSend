@@ -13,7 +13,7 @@ If evrything is okay, open the Microsoft SHELL/CMD and put this command:
 ```
 -python start.py
 ```
-Now follow instructions on ecran, if you spoolied something, delete inside of config.json file.
+Now follow instructions on sreen, if you spoolied something, delete inside of config.json file.
 
 # Know issues
 - Special Characters gives error.
