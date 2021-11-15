@@ -191,8 +191,6 @@ if __name__ == '__main__':
         client = Bot(email, password, session_cookies=cookies, logging_level=20)
         with open('session.json', 'w') as f:
             json.dump(client.getSession(), f)
-        data = client.fetchUserInfo("100031393994192")["100031393994192"]
-        print(data)
-      #  client.listen()
+        client.listen()
     except Exception as s:
         print("Wystąpił błąd: {}, sprawdź plik konfiguracyjny.".format(s))
