@@ -5,6 +5,9 @@ from fbchat.models import *
 thread_id = ""
 thread_type = ""
 cookies = {}
+def usun(z):
+    removeSpecialChars = z.translate({ord(c): " " for c in "\"\'`"})
+    return(removeSpecialChars)
 def sql(sql_text, sql_type):
     mydb = mysql.connector.connect(
         host=host,
@@ -49,6 +52,7 @@ def create_code():
     else:
         create_code()
 def add_message(message_object):
+    client = message_object[0]
     medianame = 'None'
     link = 'None'
     thread_type = 'None'
@@ -75,42 +79,48 @@ def add_message(message_object):
     if message_object[1].text == None:
         sql("INSERT INTO `message_object`(`text`, `mentions_hash`, `emoji_size`, `u_id`, `author`, `timestamp`, `reactions`, `sticker`, `attachments`,`value`,`thread_id`, `thread_type`) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(message_object[1].text,mentions_code,message_object[1].emoji_size,message_object[1].uid,message_object[1].author,message_object[1].timestamp,'None',sticker,link,medianame,message_object[2],thread_type),"INSERT")
     else:
-        sql("INSERT INTO `message_object`(`text`, `mentions_hash`, `emoji_size`, `u_id`, `author`, `timestamp`, `reactions`, `sticker`, `attachments`,`value`,`thread_id`, `thread_type`) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(u"{}".format(message_object[1].text),mentions_code,message_object[1].emoji_size,message_object[1].uid,message_object[1].author,message_object[1].timestamp,'None',sticker,link,medianame,message_object[2],thread_type),"INSERT")
+        
+        sql("INSERT INTO `message_object`(`text`, `mentions_hash`, `emoji_size`, `u_id`, `author`, `timestamp`, `reactions`, `sticker`, `attachments`,`value`,`thread_id`, `thread_type`) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')".format(u"{}".format(usun(message_object[1].text)),mentions_code,message_object[1].emoji_size,message_object[1].uid,message_object[1].author,message_object[1].timestamp,'None',sticker,link,medianame,message_object[2],thread_type),"INSERT")
     if message_object[1].mentions:     
         for x in message_object[1].mentions:
             add_ozn(mentions_code,x.thread_id,x.length,x.offset)
-def check_wiadomosc_data(message_id,thread_type,thread_id):
-   return(sql("""SELECT * FROM `message_object` WHERE `u_id`='{}' AND `thread_type`='{}' AND `thread_id`='{}'""".format(message_id,thread_type,thread_id),"DATA"))
+def check_wiadomosc_data(message_id,thread_type,thread_id,author_id):
+   return(sql("""SELECT * FROM `message_object` WHERE `u_id`='{}' AND `thread_type`='{}' AND `thread_id`='{}' AND `author`='{}'""".format(message_id,thread_type,thread_id,author_id),"DATA"))
 def check_mentions(hash):
     return(sql("""SELECT * FROM `message_mention` WHERE `hash`='{}'""".format(hash),"DATA"))
 def deleted_message(message_object):
     client = message_object[0]
     try:
-        wiadomosc = check_wiadomosc_data(message_object[1],message_object[3],message_object[2])[0]
+        wiadomosc = check_wiadomosc_data(message_object[1],message_object[4],message_object[3],message_object[2])[0]
+        if wiadomosc[12] == "ThreadType.USER":
+            thread_type = ThreadType.USER
+        if wiadomosc[12] == "ThreadType.GROUP":
+            thread_type = ThreadType.GROUP
+            
         data = check_mentions(wiadomosc[2])
         if not isinstance(data,int):
             if len(data) > 0: 
                 memtn = []
                 for inf in data:
                     memtn.append(Mention(int(inf[2]),int(inf[3])+20,int(inf[4])))
-                client.send(Message(("Usunięta wiadomość: {} ".format(wiadomosc[1])),memtn),message_object[2],message_object[3])
+                client.send(Message(("Usunięta wiadomość: {} ".format(wiadomosc[1])),memtn),message_object[3],thread_type)
         else:
             if wiadomosc[10] == 'png' or wiadomosc[10] == 'jpg':
-                client.sendRemoteImage(wiadomosc[9], "Usunięte zdjęcie;",message_object[2],message_object[3])
+                client.sendRemoteImage(wiadomosc[9], "Usunięte zdjęcie;",message_object[3],thread_type)
             elif wiadomosc[10] == 'gif':
-                client.sendRemoteImage(wiadomosc[9], "Usunięty gif;",message_object[2],message_object[3])
+                client.sendRemoteImage(wiadomosc[9], "Usunięty gif;",message_object[3],thread_type)
             elif wiadomosc[10][0:9] == 'audioclip':
-                client.sendRemoteVoiceClips(wiadomosc[9],"Usunięta wiadomość głsoowa;",message_object[2],message_object[3])
+                client.sendRemoteVoiceClips(wiadomosc[9],"Usunięta wiadomość głsoowa;",message_object[3],thread_type)
             else:
                 if wiadomosc[8] != 'None':
                     if wiadomosc[4] != 'None':
-                        client.send(Message(sticker=Sticker(wiadomosc[8])),message_object[2],message_object[3])
+                        client.send(Message(sticker=Sticker(wiadomosc[8])),message_object[3],thread_type)
                     else:
-                        client.send(Message(sticker=Sticker(wiadomosc[8])),message_object[2],message_object[3])
+                        client.send(Message(sticker=Sticker(wiadomosc[8])),message_object[3],thread_type)
                 else:
-                    client.send(Message("Usunięta wiadomość: {}".format(wiadomosc[1])),message_object[2],message_object[3])
+                    client.send(Message("Usunięta wiadomość: {}".format(wiadomosc[1])),message_object[3],thread_type)
     except Exception as s:
-        client.send(Message("Wystąpił błąd z przechwytywaniem wiadomości: {}".format(s)),message_object[2],message_object[3])
+        client.send(Message("Wystąpił błąd z przechwytywaniem wiadomości: {}".format(s)),message_object[3],thread_type)
         
 class Bot(Client):
 
@@ -130,13 +140,14 @@ class Bot(Client):
         else:
             self.login(email, password)
     def onMessageUnsent(self, mid=None, author_id=None, thread_id=thread_id, thread_type=thread_type, ts=None, msg=None):
-        send = [(self,mid,thread_id,thread_type)]
+        send = [(self,mid,author_id,thread_id,thread_type)]
+
         threading.Thread(target=deleted_message, args=((send))).start()  
 
     def onMessage(self, mid=None, author_id=None, message=None, message_object=None, thread_id=thread_id,
                   thread_type=ThreadType.GROUP, ts=None, metadata=None, msg=None):
         add_message((client,message_object,thread_id,thread_type))
-        
+
 if __name__ == '__main__':
     print("Startuję...")
     try:
@@ -180,7 +191,8 @@ if __name__ == '__main__':
         client = Bot(email, password, session_cookies=cookies, logging_level=20)
         with open('session.json', 'w') as f:
             json.dump(client.getSession(), f)
-
-        client.listen()
+        data = client.fetchUserInfo("100031393994192")["100031393994192"]
+        print(data)
+      #  client.listen()
     except Exception as s:
         print("Wystąpił błąd: {}, sprawdź plik konfiguracyjny.".format(s))
